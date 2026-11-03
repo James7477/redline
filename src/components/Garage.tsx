@@ -127,7 +127,8 @@ export function Garage({
         </div>
         <p className="hint">
           {DIFFICULTIES.find((d) => d.id === difficulty)?.blurb} Tap <b>STAGE</b> to arm the tree, then{' '}
-          <b>LAUNCH</b> on green. Shift near the red zone for a perfect-shift bonus.
+          <b>LAUNCH</b> on green — a quick reaction buys real track, and the rival never jumps you.
+          Shift near the red zone for a perfect-shift bonus.
         </p>
       </div>
 

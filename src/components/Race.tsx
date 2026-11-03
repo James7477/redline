@@ -9,6 +9,10 @@ type Phase = 'idle' | 'tree' | 'running' | 'finished';
 
 /** Seconds from tree start to green, with ambers every 0.5 s. */
 const GREEN_DELAY = 1.5;
+/** Reaction (s from green) that earns the holeshot hit off the line. */
+const HOLESHOT_RT = 0.22;
+/** Reaction (s from green) past which the leave reads as late. */
+const LATE_RT = 0.4;
 
 type Props = {
   spec: CarSpec;
@@ -222,8 +226,8 @@ export function Race({
       }
 
       if (phaseRef.current === 'running') {
-        // The rival leaves with you, not on the green. Waiting on the tree can no
-        // longer hand it a head start down the track.
+        // The rival leaves on its own reaction off the green, floored at your tap
+        // (see handlePrimary): a slow serve is never jumped, a quick one gains track.
         if (!q.launched && rivalStartRef.current > 0 && now >= rivalStartRef.current) {
           q.launched = true;
           q.launchT = 0;
@@ -351,17 +355,26 @@ export function Race({
       return;
     }
     engine.ensure();
+    const rt = Math.max(0, now - greenAtRef.current);
     p.launched = true;
     p.launchT = 0;
     p.et = 0;
-    p.reaction = Math.max(0, now - greenAtRef.current);
-    rivalStartRef.current = now + rivalReactionRef.current;
+    p.reaction = rt;
+    // The rival leaves on its own reaction off the green, never before your tap.
+    // That keeps a slow serve from being jumped while making a fast tap pay: the
+    // gap you open is exactly the reaction time you beat it by.
+    rivalStartRef.current = Math.max(greenAtRef.current + rivalReactionRef.current, now);
+    if (rt <= HOLESHOT_RT) p.boost = Math.max(p.boost, 0.6);
     phaseRef.current = 'running';
     setLaunched(true);
     setPhase('running');
+    showToast(
+      `${rt <= HOLESHOT_RT ? 'HOLESHOT' : rt <= LATE_RT ? 'CLEAN' : 'LATE'} ${rt.toFixed(3)}`,
+      rt <= LATE_RT ? 'good' : 'bad',
+    );
     engine.launch();
     vibrate(30);
-  }, [foul, startTree]);
+  }, [foul, showToast, startTree]);
 
   const handleShift = useCallback(() => {
     const p = playerRef.current;
