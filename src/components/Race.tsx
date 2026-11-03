@@ -1,7 +1,14 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { engine } from '../game/audio';
 import type { CarSpec, Difficulty } from '../game/cars';
-import { createRunner, shift, stepRunner, TRACK_LENGTH, type Runner } from '../game/physics';
+import {
+  createRunner,
+  MPS_TO_MPH,
+  shift,
+  stepRunner,
+  TRACK_LENGTH,
+  type Runner,
+} from '../game/physics';
 import { drawScene, type CarView } from '../game/render';
 import { ResultPanel, type RaceResult } from './ResultPanel';
 
@@ -280,7 +287,7 @@ export function Race({
         const gap = p.dist - q.dist;
         gapRef.current.textContent = `${gap >= 0 ? '+' : ''}${gap.toFixed(0)}m`;
       }
-      if (speedRef.current) speedRef.current.textContent = String(Math.round(p.v * 3.6));
+      if (speedRef.current) speedRef.current.textContent = String(Math.round(p.v * MPS_TO_MPH));
       if (gearRef.current) gearRef.current.textContent = p.launched ? String(p.gear + 1) : 'N';
       const ratio = Math.min(1, p.rpm / spec.redline);
       if (rpmRef.current) {
@@ -462,7 +469,7 @@ export function Race({
           </div>
           <div className="speedbox">
             <b ref={speedRef}>0</b>
-            <small>KM/H</small>
+            <small>MPH</small>
           </div>
         </div>
 

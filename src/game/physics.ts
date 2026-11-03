@@ -6,6 +6,8 @@ export const WHEEL_R = 0.34;
 /** Shift anywhere above this fraction of redline for a perfect shift. */
 export const PERFECT_MIN = 0.87;
 export const SIXTY_FEET = 18.288;
+/** Metres per second to miles per hour — the speedo and trap speed read in mph. */
+export const MPS_TO_MPH = 2.23694;
 const HUNDRED_KPH = 27.7778;
 
 export type Runner = {
