@@ -1,8 +1,16 @@
 import { useMemo, useState, type CSSProperties } from 'react';
 import { CARS, DIFFICULTIES, type CarSpec, type DifficultyId } from '../game/cars';
 import { DEFAULT_LIVERY, applyLivery, type Livery } from '../game/livery';
-import { MPS_TO_MPH } from '../game/physics';
-import { formatEt, launchRating, type LiveryMap, type Reactions, type Records } from '../game/storage';
+import {
+  formatEt,
+  formatSpeed,
+  launchRating,
+  speedUnit,
+  type LiveryMap,
+  type Reactions,
+  type Records,
+  type Units,
+} from '../game/storage';
 import { CarThumb } from './CarThumb';
 import { Customize } from './Customize';
 
@@ -12,6 +20,8 @@ type Props = {
   records: Records;
   liveries: LiveryMap;
   reactions: Reactions;
+  units: Units;
+  onUnits: (units: Units) => void;
   onPickCar: (id: string) => void;
   onPickDifficulty: (id: DifficultyId) => void;
   onLivery: (carId: string, livery: Livery) => void;
@@ -37,6 +47,7 @@ function CarCard({
   trap,
   top,
   reaction,
+  units,
   onPick,
 }: {
   car: CarSpec;
@@ -46,10 +57,10 @@ function CarCard({
   trap: number;
   top: number;
   reaction: number | null;
+  units: Units;
   onPick: () => void;
 }) {
   const rating = launchRating(reaction);
-  const mph = (v: number) => (v > 0 ? String(Math.round(v * MPS_TO_MPH)) : '—');
   return (
     <button
       className={`car ${selected ? 'sel' : ''}`}
@@ -98,12 +109,12 @@ function CarCard({
       </div>
       <div className="car-speed">
         <span>
-          TRAP <b>{mph(trap)}</b>
+          TRAP <b>{formatSpeed(trap, units)}</b>
         </span>
         <span>
-          TOP <b>{mph(top)}</b>
+          TOP <b>{formatSpeed(top, units)}</b>
         </span>
-        <i>MPH</i>
+        <i>{speedUnit(units)}</i>
       </div>
     </button>
   );
@@ -115,6 +126,8 @@ export function Garage({
   records,
   liveries,
   reactions,
+  units,
+  onUnits,
   onPickCar,
   onPickDifficulty,
   onLivery,
@@ -136,11 +149,25 @@ export function Garage({
   return (
     <div className="garage">
       <header className="brand-head">
-        <div className="brand">
-          <span className="slash" />
-          REDLINE
+        <div>
+          <div className="brand">
+            <span className="slash" />
+            REDLINE
+          </div>
+          <div className="brand-sub">QUARTER MILE · 402 m</div>
         </div>
-        <div className="brand-sub">QUARTER MILE · 402 m</div>
+        <div className="unit-toggle" role="group" aria-label="Speed units">
+          {(['mph', 'kmh'] as Units[]).map((u) => (
+            <button
+              key={u}
+              className={u === units ? 'on' : ''}
+              aria-pressed={u === units}
+              onPointerDown={() => onUnits(u)}
+            >
+              {speedUnit(u)}
+            </button>
+          ))}
+        </div>
       </header>
 
       <div className="garage-body">
@@ -155,6 +182,7 @@ export function Garage({
               trap={records[car.id]?.trap ?? 0}
               top={records[car.id]?.top ?? 0}
               reaction={reactions[car.id] ?? null}
+              units={units}
               onPick={() => onPickCar(car.id)}
             />
           ))}

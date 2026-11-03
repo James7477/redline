@@ -9,12 +9,15 @@ import {
   loadLiveries,
   loadReactions,
   loadRecords,
+  loadUnits,
   saveLivery,
   saveReaction,
   saveRecord,
+  saveUnits,
   type LiveryMap,
   type Reactions,
   type Records,
+  type Units,
 } from './game/storage';
 
 export default function App() {
@@ -27,6 +30,7 @@ export default function App() {
   const [liveries, setLiveries] = useState<LiveryMap>(() => loadLiveries());
   /** Best reaction per car, carried in from the tree drill. */
   const [reactions, setReactions] = useState<Reactions>(() => loadReactions());
+  const [units, setUnits] = useState<Units>(() => loadUnits());
 
   const baseSpec = carById(carId);
   const spec = useMemo(() => applyLivery(baseSpec, liveries[carId]), [baseSpec, liveries, carId]);
@@ -70,6 +74,10 @@ export default function App() {
     setLiveries(saveLivery(id, livery));
   }, []);
 
+  const handleUnits = useCallback((next: Units) => {
+    setUnits(saveUnits(next));
+  }, []);
+
   // Keep the page from rubber-banding behind the game on iOS.
   useEffect(() => {
     const prevent = (e: TouchEvent) => {
@@ -92,6 +100,8 @@ export default function App() {
             onPickDifficulty={setDifficulty}
             onLivery={handleLivery}
             reactions={reactions}
+            units={units}
+            onUnits={handleUnits}
             onStart={start}
             onPractice={practice}
           />
@@ -107,6 +117,7 @@ export default function App() {
             spec={spec}
             difficulty={diff}
             muted={muted}
+            units={units}
             bestEt={bestEt}
             onToggleMute={() => setMuted((m) => !m)}
             onExit={exit}

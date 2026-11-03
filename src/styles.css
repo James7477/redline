@@ -82,6 +82,35 @@ button {
 
 .brand-head {
   flex: none;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.unit-toggle {
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.045);
+}
+
+.unit-toggle button {
+  height: 26px;
+  padding: 0 9px;
+  border-radius: 8px;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  color: var(--dim);
+  transition: background 0.16s ease, color 0.16s ease;
+}
+
+.unit-toggle button.on {
+  background: #212130;
+  color: #fff;
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.5);
 }
 
 .brand {

@@ -3,13 +3,13 @@ import { engine } from '../game/audio';
 import type { CarSpec, Difficulty } from '../game/cars';
 import {
   createRunner,
-  MPS_TO_MPH,
   shift,
   stepRunner,
   TRACK_LENGTH,
   type Runner,
 } from '../game/physics';
 import { drawScene, type CarView } from '../game/render';
+import { formatSpeed, speedUnit, type Units } from '../game/storage';
 import { ResultPanel, type RaceResult } from './ResultPanel';
 
 type Phase = 'idle' | 'tree' | 'running' | 'finished';
@@ -25,6 +25,8 @@ type Props = {
   spec: CarSpec;
   difficulty: Difficulty;
   muted: boolean;
+  /** Speed unit chosen in the garage. */
+  units: Units;
   bestEt: number | null;
   onToggleMute: () => void;
   onExit: () => void;
@@ -57,6 +59,7 @@ export function Race({
   spec,
   difficulty,
   muted,
+  units,
   bestEt,
   onToggleMute,
   onExit,
@@ -289,7 +292,9 @@ export function Race({
         const gap = p.dist - q.dist;
         gapRef.current.textContent = `${gap >= 0 ? '+' : ''}${gap.toFixed(0)}m`;
       }
-      if (speedRef.current) speedRef.current.textContent = String(Math.round(p.v * MPS_TO_MPH));
+      if (speedRef.current) {
+        speedRef.current.textContent = p.v > 0.2 ? formatSpeed(p.v, units) : '0';
+      }
       if (gearRef.current) gearRef.current.textContent = p.launched ? String(p.gear + 1) : 'N';
       const ratio = Math.min(1, p.rpm / spec.redline);
       if (rpmRef.current) {
@@ -332,7 +337,7 @@ export function Race({
       window.clearTimeout(toastTimerRef.current);
       engine.silence();
     };
-  }, [difficulty.shiftMiss, finishRace, spec.redline]);
+  }, [difficulty.shiftMiss, finishRace, spec.redline, units]);
 
   const startTree = useCallback(() => {
     engine.ensure();
@@ -471,7 +476,7 @@ export function Race({
           </div>
           <div className="speedbox">
             <b ref={speedRef}>0</b>
-            <small>MPH</small>
+            <small>{speedUnit(units)}</small>
           </div>
         </div>
 
@@ -507,6 +512,7 @@ export function Race({
       {result && (
         <ResultPanel
           result={result}
+          units={units}
           carName={spec.name}
           rivalName={`${spec.name} — RIVAL`}
           bestEt={bestEt}

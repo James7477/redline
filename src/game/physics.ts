@@ -8,6 +8,8 @@ export const PERFECT_MIN = 0.87;
 export const SIXTY_FEET = 18.288;
 /** Metres per second to miles per hour — the speedo and trap speed read in mph. */
 export const MPS_TO_MPH = 2.23694;
+/** Metres per second to km/h, for players who prefer metric. */
+export const MPS_TO_KMH = 3.6;
 const HUNDRED_KPH = 27.7778;
 
 export type Runner = {

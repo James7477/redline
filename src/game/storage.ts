@@ -1,4 +1,5 @@
 import type { Livery } from './livery';
+import { MPS_TO_KMH, MPS_TO_MPH } from './physics';
 
 const KEY = 'redline.records.v1';
 
@@ -137,4 +138,39 @@ export function launchRating(rt: number | null): { score: number; label: string 
   const label =
     rt <= 0.12 ? 'SHARP' : rt <= 0.22 ? 'QUICK' : rt <= 0.4 ? 'FAIR' : rt <= 0.6 ? 'SLEEPY' : 'ASLEEP';
   return { score, label };
+}
+
+/* ---------------------------------------------------------------- units */
+
+const UNITS_KEY = 'redline.units.v1';
+
+/** Speed display preference: miles per hour or km/h. */
+export type Units = 'mph' | 'kmh';
+
+export function loadUnits(): Units {
+  try {
+    return localStorage.getItem(UNITS_KEY) === 'kmh' ? 'kmh' : 'mph';
+  } catch {
+    return 'mph';
+  }
+}
+
+export function saveUnits(units: Units): Units {
+  try {
+    localStorage.setItem(UNITS_KEY, units);
+  } catch {
+    /* storage full or blocked */
+  }
+  return units;
+}
+
+/** Unit label for the speedo and readouts, e.g. MPH. */
+export function speedUnit(units: Units): string {
+  return units === 'kmh' ? 'KM/H' : 'MPH';
+}
+
+/** m/s in the chosen unit, rounded, or a dash when there is no reading yet. */
+export function formatSpeed(mps: number, units: Units): string {
+  if (!Number.isFinite(mps) || mps <= 0) return '—';
+  return String(Math.round(mps * (units === 'kmh' ? MPS_TO_KMH : MPS_TO_MPH)));
 }

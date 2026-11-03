@@ -1,5 +1,4 @@
-import { MPS_TO_MPH } from '../game/physics';
-import { formatEt } from '../game/storage';
+import { formatEt, formatSpeed, speedUnit, type Units } from '../game/storage';
 
 export type RaceResult = {
   outcome: 'win' | 'lose' | 'foul' | 'dnf';
@@ -20,6 +19,8 @@ type Props = {
   result: RaceResult;
   carName: string;
   rivalName: string;
+  /** Speed unit chosen in the garage. */
+  units: Units;
   bestEt: number | null;
   onAgain: () => void;
   onGarage: () => void;
@@ -39,8 +40,9 @@ const SUB: Record<RaceResult['outcome'], string> = {
   dnf: 'Never got off the line',
 };
 
-export function ResultPanel({ result, carName, rivalName, bestEt, onAgain, onGarage }: Props) {
-  const trap = result.playerTrap > 0 ? `${Math.round(result.playerTrap * MPS_TO_MPH)} mph` : '—';
+export function ResultPanel({ result, carName, rivalName, units, bestEt, onAgain, onGarage }: Props) {
+  const unit = speedUnit(units).toLowerCase();
+  const trap = result.playerTrap > 0 ? `${formatSpeed(result.playerTrap, units)} ${unit}` : '—';
 
   return (
     <div className="result">
@@ -64,7 +66,7 @@ export function ResultPanel({ result, carName, rivalName, bestEt, onAgain, onGar
             <span className="lane-tag">RIVAL</span>
             <b>{formatEt(result.rivalEt)}</b>
             <small>
-              {result.rivalTrap > 0 ? `${Math.round(result.rivalTrap * MPS_TO_MPH)} mph` : '—'}
+              {result.rivalTrap > 0 ? `${formatSpeed(result.rivalTrap, units)} ${unit}` : '—'}
             </small>
             <span className="lane-car">{rivalName}</span>
           </div>
