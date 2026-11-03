@@ -1,0 +1,18 @@
+{
+  "name": "REDLINE — Quarter Mile",
+  "short_name": "REDLINE",
+  "description": "A quarter-mile drag racing game built for your phone.",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#07070d",
+  "theme_color": "#07070d",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
