@@ -8,7 +8,8 @@ export type RaceResult = {
   playerTop: number;
   reaction: number;
   sixty: number | null;
-  hundred: number | null;
+  /** Time to 60 mph. */
+  sixtyMph: number | null;
   rivalEt: number;
   rivalTrap: number;
   margin: number;
@@ -82,8 +83,8 @@ export function ResultPanel({ result, carName, rivalName, units, bestEt, onAgain
             <b>{result.sixty ? result.sixty.toFixed(3) : '—'}</b>
           </div>
           <div>
-            <span>0–100</span>
-            <b>{result.hundred ? result.hundred.toFixed(2) : '—'}</b>
+            <span>0–60 MPH</span>
+            <b>{result.sixtyMph ? result.sixtyMph.toFixed(2) : '—'}</b>
           </div>
           <div>
             <span>MARGIN</span>

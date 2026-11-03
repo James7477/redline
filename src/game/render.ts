@@ -1,4 +1,5 @@
 import type { CarSpec } from './cars';
+import type { Track } from './physics';
 
 export type CarView = {
   spec: CarSpec;
@@ -22,6 +23,8 @@ export type SceneInput = {
   rivalDist: number;
   player: CarView;
   rival: CarView;
+  /** Strip length, for the distance boards and the finish gantry. */
+  track: Track;
 };
 
 const CITY_TILE = 2600;
@@ -762,10 +765,11 @@ export function drawScene(ctx: CanvasRenderingContext2D, s: SceneInput): void {
     ctx.fillRect(x - kerbOff, h - 14, 17, 6);
   }
 
-  // Distance boards every 100 m, plus the finish gantry
+  // Distance boards every quarter of the strip, labelled in feet
   ctx.textAlign = 'center';
-  for (let m = 0; m <= 400; m += 100) {
-    const dx = carX + aheadX(m - s.playerDist, w);
+  const boardStep = s.track.feet / 4;
+  for (let ft = 0; ft <= s.track.feet; ft += boardStep) {
+    const dx = carX + aheadX(ft / 3.28084 - s.playerDist, w);
     if (dx < -60 || dx > w + 60) continue;
     const depth = clamp(1 - (dx / w) * 0.5, 0.5, 1);
     ctx.globalAlpha = 0.5 * depth + 0.2;
@@ -776,7 +780,7 @@ export function drawScene(ctx: CanvasRenderingContext2D, s: SceneInput): void {
     ctx.strokeRect(dx - 15 * depth, horizon - 30 * depth, 30 * depth, 30 * depth);
     ctx.fillStyle = '#9fd4ff';
     ctx.font = `700 ${Math.round(13 * depth)}px ui-monospace, SFMono-Regular, Menlo, monospace`;
-    ctx.fillText(String(m), dx, horizon - 9 * depth);
+    ctx.fillText(String(ft), dx, horizon - 9 * depth);
     ctx.globalAlpha = 1;
   }
 
@@ -788,7 +792,7 @@ export function drawScene(ctx: CanvasRenderingContext2D, s: SceneInput): void {
   }
 
   // Finish line + gantry
-  const finishX = carX + aheadX(402.336 - s.playerDist, w);
+  const finishX = carX + aheadX(s.track.metres - s.playerDist, w);
   if (finishX > -120 && finishX < w + 120) {
     const cell = 12;
     for (let y = horizon + 6; y < h; y += cell) {
@@ -804,7 +808,7 @@ export function drawScene(ctx: CanvasRenderingContext2D, s: SceneInput): void {
     ctx.strokeRect(finishX - 22, horizon - 44, 44, 18);
     ctx.fillStyle = '#7fe0ff';
     ctx.font = '700 10px ui-monospace, SFMono-Regular, Menlo, monospace';
-    ctx.fillText('402m', finishX, horizon - 31);
+    ctx.fillText(`${s.track.feet}ft`, finishX, horizon - 31);
   }
 
   // Speed streaks

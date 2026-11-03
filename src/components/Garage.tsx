@@ -1,10 +1,12 @@
 import { useMemo, useState, type CSSProperties } from 'react';
 import { CARS, DIFFICULTIES, type CarSpec, type DifficultyId } from '../game/cars';
 import { DEFAULT_LIVERY, applyLivery, type Livery } from '../game/livery';
+import { TRACKS, type TrackLength } from '../game/physics';
 import {
   formatEt,
   formatSpeed,
   launchRating,
+  recordKey,
   speedUnit,
   type LiveryMap,
   type Reactions,
@@ -22,6 +24,8 @@ type Props = {
   reactions: Reactions;
   units: Units;
   onUnits: (units: Units) => void;
+  track: TrackLength;
+  onTrack: (track: TrackLength) => void;
   onPickCar: (id: string) => void;
   onPickDifficulty: (id: DifficultyId) => void;
   onLivery: (carId: string, livery: Livery) => void;
@@ -128,6 +132,8 @@ export function Garage({
   reactions,
   units,
   onUnits,
+  track,
+  onTrack,
   onPickCar,
   onPickDifficulty,
   onLivery,
@@ -154,7 +160,9 @@ export function Garage({
             <span className="slash" />
             REDLINE
           </div>
-          <div className="brand-sub">QUARTER MILE · 402 m</div>
+          <div className="brand-sub">
+            {TRACKS[track].name} · {TRACKS[track].feet} FT
+          </div>
         </div>
         <div className="unit-toggle" role="group" aria-label="Speed units">
           {(['mph', 'kmh'] as Units[]).map((u) => (
@@ -171,6 +179,19 @@ export function Garage({
       </header>
 
       <div className="garage-body">
+        <h2 className="label">TRACK</h2>
+        <div className="seg">
+          {(['eighth', 'quarter'] as TrackLength[]).map((t) => (
+            <button
+              key={t}
+              className={t === track ? 'on' : ''}
+              onPointerDown={() => onTrack(t)}
+            >
+              {TRACKS[t].name}
+            </button>
+          ))}
+        </div>
+
         <h2 className="label">SELECT YOUR CAR</h2>
         <div className="cars">
           {CARS.map((car) => (
@@ -178,9 +199,9 @@ export function Garage({
               key={car.id}
               car={painted[car.id] ?? car}
               selected={car.id === carId}
-              best={records[car.id]?.et ?? null}
-              trap={records[car.id]?.trap ?? 0}
-              top={records[car.id]?.top ?? 0}
+              best={records[recordKey(car.id, track)]?.et ?? null}
+              trap={records[recordKey(car.id, track)]?.trap ?? 0}
+              top={records[recordKey(car.id, track)]?.top ?? 0}
               reaction={reactions[car.id] ?? null}
               units={units}
               onPick={() => onPickCar(car.id)}

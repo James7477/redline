@@ -1,7 +1,23 @@
 import { torqueFactor, type CarSpec } from './cars';
 
-/** Quarter mile, in metres. */
-export const TRACK_LENGTH = 402.336;
+/** The two strip lengths you can race. */
+export type TrackLength = 'eighth' | 'quarter';
+
+export type Track = {
+  id: TrackLength;
+  name: string;
+  /** Length in feet, for every readout the player sees. */
+  feet: number;
+  /** Length in metres, for the physics. */
+  metres: number;
+};
+
+/** Every distance in the game reads in feet — these are the American strips. */
+export const TRACKS: Record<TrackLength, Track> = {
+  eighth: { id: 'eighth', name: '1/8 MILE', feet: 660, metres: 201.168 },
+  quarter: { id: 'quarter', name: '1/4 MILE', feet: 1320, metres: 402.336 },
+};
+
 export const WHEEL_R = 0.34;
 /** Shift anywhere above this fraction of redline for a perfect shift. */
 export const PERFECT_MIN = 0.87;
@@ -10,7 +26,10 @@ export const SIXTY_FEET = 18.288;
 export const MPS_TO_MPH = 2.23694;
 /** Metres per second to km/h, for players who prefer metric. */
 export const MPS_TO_KMH = 3.6;
-const HUNDRED_KPH = 27.7778;
+/** Metres per second to feet per second, for the distance readouts. */
+export const MPS_TO_FPS = 3.28084;
+/** 60 mph in m/s, the American stand-in for the old 0-100 km/h split. */
+const SIXTY_MPH = 26.8224;
 
 export type Runner = {
   spec: CarSpec;
@@ -33,7 +52,8 @@ export type Runner = {
   /** Fastest the car went at any point in the run, in m/s. */
   topSpeed: number;
   sixty: number | null;
-  hundred: number | null;
+  /** Time to 60 mph, m/s threshold. */
+  sixtyMph: number | null;
   powerScale: number;
 };
 
@@ -58,7 +78,7 @@ export function createRunner(spec: CarSpec, powerScale = 1): Runner {
     trap: 0,
     topSpeed: 0,
     sixty: null,
-    hundred: null,
+    sixtyMph: null,
     powerScale,
   };
 }
@@ -122,7 +142,7 @@ export function stepRunner(r: Runner, dt: number, throttle: number): void {
     r.launchT += dt;
     r.et += dt;
     if (r.sixty === null && r.dist >= SIXTY_FEET) r.sixty = r.et;
-    if (r.hundred === null && r.v >= HUNDRED_KPH) r.hundred = r.et;
+    if (r.sixtyMph === null && r.v >= SIXTY_MPH) r.sixtyMph = r.et;
   }
 }
 

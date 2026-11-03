@@ -5,14 +5,18 @@ import { TreePractice } from './components/TreePractice';
 import type { RaceResult } from './components/ResultPanel';
 import { carById, difficultyById, type DifficultyId } from './game/cars';
 import { applyLivery, type Livery } from './game/livery';
+import type { TrackLength } from './game/physics';
 import {
   loadLiveries,
   loadReactions,
   loadRecords,
+  loadTrack,
   loadUnits,
+  recordKey,
   saveLivery,
   saveReaction,
   saveRecord,
+  saveTrack,
   saveUnits,
   type LiveryMap,
   type Reactions,
@@ -31,18 +35,21 @@ export default function App() {
   /** Best reaction per car, carried in from the tree drill. */
   const [reactions, setReactions] = useState<Reactions>(() => loadReactions());
   const [units, setUnits] = useState<Units>(() => loadUnits());
+  const [track, setTrack] = useState<TrackLength>(() => loadTrack());
 
   const baseSpec = carById(carId);
   const spec = useMemo(() => applyLivery(baseSpec, liveries[carId]), [baseSpec, liveries, carId]);
   const diff = difficultyById(difficulty);
-  const bestEt = records[spec.id]?.et ?? null;
+  const bestEt = records[recordKey(spec.id, track)]?.et ?? null;
 
   const handleResult = useCallback(
     (result: RaceResult) => {
       if (result.outcome === 'foul' || result.playerEt <= 0) return;
-      setRecords(saveRecord(spec.id, result.playerEt, result.playerTrap, result.playerTop));
+      setRecords(
+        saveRecord(spec.id, track, result.playerEt, result.playerTrap, result.playerTop),
+      );
     },
-    [spec.id],
+    [spec.id, track],
   );
 
   const handleReaction = useCallback(
@@ -78,6 +85,10 @@ export default function App() {
     setUnits(saveUnits(next));
   }, []);
 
+  const handleTrack = useCallback((next: TrackLength) => {
+    setTrack(saveTrack(next));
+  }, []);
+
   // Keep the page from rubber-banding behind the game on iOS.
   useEffect(() => {
     const prevent = (e: TouchEvent) => {
@@ -102,6 +113,8 @@ export default function App() {
             reactions={reactions}
             units={units}
             onUnits={handleUnits}
+            track={track}
+            onTrack={handleTrack}
             onStart={start}
             onPractice={practice}
           />
@@ -113,11 +126,12 @@ export default function App() {
           />
         ) : (
           <Race
-            key={`${spec.id}-${difficulty}-${run}-${spec.body}`}
+            key={`${spec.id}-${difficulty}-${track}-${run}-${spec.body}`}
             spec={spec}
             difficulty={diff}
             muted={muted}
             units={units}
+            track={track}
             bestEt={bestEt}
             onToggleMute={() => setMuted((m) => !m)}
             onExit={exit}

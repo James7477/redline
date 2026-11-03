@@ -1,5 +1,5 @@
 import type { Livery } from './livery';
-import { MPS_TO_KMH, MPS_TO_MPH } from './physics';
+import { MPS_TO_KMH, MPS_TO_MPH, type TrackLength } from './physics';
 
 const KEY = 'redline.records.v1';
 
@@ -13,6 +13,11 @@ export type StoredRecord = {
 
 export type Records = Record<string, StoredRecord>;
 
+/** Records are kept per car and per track — an eighth-mile pass can't stand as a quarter best. */
+export function recordKey(id: string, track: TrackLength): string {
+  return `${id}:${track}`;
+}
+
 export function loadRecords(): Records {
   try {
     const raw = localStorage.getItem(KEY);
@@ -20,10 +25,12 @@ export function loadRecords(): Records {
     const parsed: unknown = JSON.parse(raw);
     if (!parsed || typeof parsed !== 'object') return {};
     const out: Records = {};
-    for (const [id, value] of Object.entries(parsed as Record<string, unknown>)) {
+    for (const [raw, value] of Object.entries(parsed as Record<string, unknown>)) {
       if (!value || typeof value !== 'object') continue;
       const v = value as Partial<StoredRecord>;
       if (typeof v.et === 'number' && Number.isFinite(v.et)) {
+        // Records saved before there were two tracks were all quarter-mile runs.
+        const id = raw.includes(':') ? raw : `${raw}:quarter`;
         out[id] = {
           et: v.et,
           trap: typeof v.trap === 'number' ? v.trap : 0,
@@ -38,11 +45,18 @@ export function loadRecords(): Records {
   }
 }
 
-export function saveRecord(id: string, et: number, trap: number, top: number): Records {
+export function saveRecord(
+  id: string,
+  track: TrackLength,
+  et: number,
+  trap: number,
+  top: number,
+): Records {
   const records = loadRecords();
-  const existing = records[id];
+  const key = recordKey(id, track);
+  const existing = records[key];
   if (!existing || et < existing.et) {
-    records[id] = { et, trap, top, when: Date.now() };
+    records[key] = { et, trap, top, when: Date.now() };
     try {
       localStorage.setItem(KEY, JSON.stringify(records));
     } catch {
@@ -167,6 +181,28 @@ export function saveUnits(units: Units): Units {
 /** Unit label for the speedo and readouts, e.g. MPH. */
 export function speedUnit(units: Units): string {
   return units === 'kmh' ? 'KM/H' : 'MPH';
+}
+
+/* --------------------------------------------------------------- tracks */
+
+const TRACK_KEY = 'redline.track.v1';
+
+/** Strip length chosen in the garage. */
+export function loadTrack(): TrackLength {
+  try {
+    return localStorage.getItem(TRACK_KEY) === 'eighth' ? 'eighth' : 'quarter';
+  } catch {
+    return 'quarter';
+  }
+}
+
+export function saveTrack(track: TrackLength): TrackLength {
+  try {
+    localStorage.setItem(TRACK_KEY, track);
+  } catch {
+    /* storage full or blocked */
+  }
+  return track;
 }
 
 /** m/s in the chosen unit, rounded, or a dash when there is no reading yet. */

@@ -3,10 +3,12 @@ import { engine } from '../game/audio';
 import type { CarSpec, Difficulty } from '../game/cars';
 import {
   createRunner,
+  MPS_TO_FPS,
   shift,
   stepRunner,
-  TRACK_LENGTH,
+  TRACKS,
   type Runner,
+  type TrackLength,
 } from '../game/physics';
 import { drawScene, type CarView } from '../game/render';
 import { formatSpeed, speedUnit, type Units } from '../game/storage';
@@ -27,6 +29,8 @@ type Props = {
   muted: boolean;
   /** Speed unit chosen in the garage. */
   units: Units;
+  /** Strip length chosen in the garage. */
+  track: TrackLength;
   bestEt: number | null;
   onToggleMute: () => void;
   onExit: () => void;
@@ -43,9 +47,15 @@ function rivalLivery(spec: CarSpec): CarSpec {
  * Exact moment (seconds, same clock as `now`) a car broke the beam, interpolated
  * inside the frame so two cars finishing on the same tick are still ordered.
  */
-function crossMoment(before: number, after: number, now: number, dt: number): number {
+function crossMoment(
+  before: number,
+  after: number,
+  now: number,
+  dt: number,
+  trackMetres: number,
+): number {
   const span = after - before;
-  const frac = span > 1e-6 ? (TRACK_LENGTH - before) / span : 1;
+  const frac = span > 1e-6 ? (trackMetres - before) / span : 1;
   return now - dt + Math.min(1, Math.max(0, frac)) * dt;
 }
 
@@ -60,6 +70,7 @@ export function Race({
   difficulty,
   muted,
   units,
+  track,
   bestEt,
   onToggleMute,
   onExit,
@@ -108,6 +119,9 @@ export function Race({
   bestRef.current = bestEt;
   onResultRef.current = onResult;
 
+  /** Strip length in metres; every distance readout is in feet. */
+  const trackMetres = TRACKS[track].metres;
+
   useEffect(() => {
     engine.setMuted(muted);
   }, [muted]);
@@ -148,7 +162,7 @@ export function Race({
       playerTop: p.topSpeed,
       reaction: p.reaction,
       sixty: p.sixty,
-      hundred: p.hundred,
+      sixtyMph: p.sixtyMph,
       rivalEt: q.finishTime ?? 0,
       rivalTrap: q.trap,
       margin,
@@ -181,7 +195,7 @@ export function Race({
       playerTop: 0,
       reaction: -1,
       sixty: null,
-      hundred: null,
+      sixtyMph: null,
       rivalEt: rivalRef.current.finishTime ?? 0,
       rivalTrap: rivalRef.current.trap,
       margin: 0,
@@ -257,20 +271,20 @@ export function Race({
           }
           const qBefore = q.dist;
           stepRunner(q, dt, 1);
-          if (q.dist >= TRACK_LENGTH) {
+          if (q.dist >= trackMetres) {
             q.finishTime = q.et;
             q.trap = q.v;
-            rivalCrossRef.current = crossMoment(qBefore, q.dist, now, dt);
+            rivalCrossRef.current = crossMoment(qBefore, q.dist, now, dt, trackMetres);
           }
         }
 
         if (p.launched && p.finishTime === null) {
           const pBefore = p.dist;
           stepRunner(p, dt, 1);
-          if (p.dist >= TRACK_LENGTH) {
+          if (p.dist >= trackMetres) {
             p.finishTime = p.et;
             p.trap = p.v;
-            playerCrossRef.current = crossMoment(pBefore, p.dist, now, dt);
+            playerCrossRef.current = crossMoment(pBefore, p.dist, now, dt, trackMetres);
             vibrate(40);
           }
         }
@@ -286,11 +300,11 @@ export function Race({
       // HUD
       if (etRef.current) etRef.current.textContent = p.launched ? p.et.toFixed(3) : '0.000';
       if (distRef.current) {
-        distRef.current.textContent = String(Math.round(Math.min(TRACK_LENGTH, p.dist)));
+        distRef.current.textContent = `${Math.round(Math.min(trackMetres, p.dist) * MPS_TO_FPS)}ft`;
       }
       if (gapRef.current) {
         const gap = p.dist - q.dist;
-        gapRef.current.textContent = `${gap >= 0 ? '+' : ''}${gap.toFixed(0)}m`;
+        gapRef.current.textContent = `${gap >= 0 ? '+' : ''}${Math.round(gap * MPS_TO_FPS)}ft`;
       }
       if (speedRef.current) {
         speedRef.current.textContent = p.v > 0.2 ? formatSpeed(p.v, units) : '0';
@@ -327,6 +341,7 @@ export function Race({
         rivalDist: q.dist,
         player: toView(p, spec),
         rival: toView(q, rivalPaintRef.current),
+        track: TRACKS[track],
       });
     };
 
@@ -337,7 +352,7 @@ export function Race({
       window.clearTimeout(toastTimerRef.current);
       engine.silence();
     };
-  }, [difficulty.shiftMiss, finishRace, spec.redline, units]);
+  }, [difficulty.shiftMiss, finishRace, spec.redline, units, track]);
 
   const startTree = useCallback(() => {
     engine.ensure();
@@ -433,13 +448,13 @@ export function Race({
           <div className="stat2">
             <span className="k">DIST</span>
             <b ref={distRef} className="wide-sm">
-              0
+              0ft
             </b>
           </div>
           <div className="stat2">
             <span className="k">GAP</span>
             <b ref={gapRef} className="wide-sm">
-              0m
+              0ft
             </b>
           </div>
         </div>
