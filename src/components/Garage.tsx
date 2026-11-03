@@ -67,15 +67,27 @@ function CarCard({
         <Stat label="POWER" value={car.stats.power} />
         <Stat label="GRIP" value={car.stats.grip} />
         <Stat label="AERO" value={car.stats.aero} />
-      </div>
-      <div className="car-launch">
-        <span>LAUNCH</span>
-        <div className="track">
-          <i style={{ width: `${rating.score}%` }} />
+        <div className="stat">
+          <span className="stat-spread">
+            LAUNCH
+            <em
+              className={
+                rating.score === 0
+                  ? 'unrated'
+                  : rating.score >= 80
+                    ? 'hi'
+                    : rating.score >= 50
+                      ? 'mid'
+                      : 'lo'
+              }
+            >
+              {rating.score === 0 ? '—' : rating.label}
+            </em>
+          </span>
+          <div className="track">
+            <i style={{ width: `${rating.score}%` }} />
+          </div>
         </div>
-        <b className={rating.score === 0 ? 'unrated' : ''}>
-          {rating.score === 0 ? 'UNRATED' : rating.label}
-        </b>
       </div>
     </button>
   );

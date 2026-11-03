@@ -149,7 +149,7 @@ button {
   display: grid;
   grid-template-columns: 104px 1fr;
   align-items: center;
-  gap: 5px 11px;
+  gap: 4px 10px;
   width: 100%;
   text-align: left;
   padding: 10px 12px;
@@ -226,7 +226,7 @@ button {
 }
 
 .car-tag {
-  margin: 1px 0 6px;
+  margin: 1px 0 4px;
   font-size: 10.5px;
   line-height: 1.35;
   color: #9a9fb8;
@@ -237,7 +237,7 @@ button {
 }
 
 .car-thumb {
-  grid-row: 1 / span 4;
+  grid-row: 1 / span 3;
   width: 100%;
   height: 62px;
   display: block;
@@ -247,8 +247,8 @@ button {
 
 .stats {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 8px;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
 }
 
 .stat {
@@ -277,44 +277,35 @@ button {
   background: linear-gradient(90deg, #5566ff, var(--teal));
 }
 
-/* Launch rating, carried in from the tree drill. */
-.car-launch {
-  display: grid;
-  grid-template-columns: auto 1fr auto;
-  align-items: center;
-  gap: 7px;
-  margin-top: 3px;
+/* Launch rating rides in the stats row, straight from the tree drill. */
+.stat-spread {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 4px;
 }
 
-.car-launch span {
-  font-size: 8px;
-  letter-spacing: 0.16em;
-  color: var(--dim);
+.stat-spread em {
+  font-style: normal;
+  font-size: 7px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  white-space: nowrap;
 }
 
-.car-launch .track {
-  height: 4px;
-  border-radius: 2px;
-  background: rgba(255, 255, 255, 0.075);
-  overflow: hidden;
+.stat-spread em.hi {
+  color: var(--teal);
 }
 
-.car-launch .track i {
-  display: block;
-  height: 100%;
-  border-radius: 2px;
-  background: linear-gradient(90deg, #ffb347, #ff3b4e);
+.stat-spread em.mid {
+  color: #e6ebff;
 }
 
-.car-launch b {
-  font-family: var(--mono);
-  font-size: 9px;
-  font-weight: 700;
-  letter-spacing: 0.13em;
-  color: #d7dcf2;
+.stat-spread em.lo {
+  color: #ffab6b;
 }
 
-.car-launch b.unrated {
+.stat-spread em.unrated {
   color: #5f6480;
 }
 
