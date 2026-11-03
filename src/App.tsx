@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Garage } from './components/Garage';
 import { Race } from './components/Race';
+import { TreePractice } from './components/TreePractice';
 import type { RaceResult } from './components/ResultPanel';
 import { carById, difficultyById, type DifficultyId } from './game/cars';
 import { applyLivery, type Livery } from './game/livery';
@@ -14,7 +15,7 @@ import {
 } from './game/storage';
 
 export default function App() {
-  const [screen, setScreen] = useState<'garage' | 'race'>('garage');
+  const [screen, setScreen] = useState<'garage' | 'race' | 'practice'>('garage');
   const [carId, setCarId] = useState('wildcat');
   const [difficulty, setDifficulty] = useState<DifficultyId>('pro');
   const [run, setRun] = useState(0);
@@ -42,6 +43,10 @@ export default function App() {
 
   const again = useCallback(() => {
     setRun((n) => n + 1);
+  }, []);
+
+  const practice = useCallback(() => {
+    setScreen('practice');
   }, []);
 
   const exit = useCallback(() => {
@@ -75,7 +80,10 @@ export default function App() {
             onPickDifficulty={setDifficulty}
             onLivery={handleLivery}
             onStart={start}
+            onPractice={practice}
           />
+        ) : screen === 'practice' ? (
+          <TreePractice onClose={exit} />
         ) : (
           <Race
             key={`${spec.id}-${difficulty}-${run}-${spec.body}`}

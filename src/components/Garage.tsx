@@ -14,6 +14,7 @@ type Props = {
   onPickDifficulty: (id: DifficultyId) => void;
   onLivery: (carId: string, livery: Livery) => void;
   onStart: () => void;
+  onPractice: () => void;
 };
 
 function Stat({ label, value }: { label: string; value: number }) {
@@ -76,6 +77,7 @@ export function Garage({
   onPickDifficulty,
   onLivery,
   onStart,
+  onPractice,
 }: Props) {
   const [customizing, setCustomizing] = useState(false);
 
@@ -133,6 +135,9 @@ export function Garage({
       </div>
 
       <footer className="garage-foot">
+        <button className="btn ghost" onPointerDown={onPractice}>
+          TREE
+        </button>
         <button className="btn ghost" onPointerDown={() => setCustomizing(true)}>
           CUSTOMIZE
         </button>

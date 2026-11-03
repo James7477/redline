@@ -313,10 +313,125 @@ button {
   color: #bcc3dc;
 }
 
+/* --------------------------------------------------------- tree practice */
+
+.practice {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  gap: 12px;
+  padding: calc(env(safe-area-inset-top) + 20px) 18px calc(env(safe-area-inset-bottom) + 14px);
+}
+
+.practice-head {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.practice-head .brand {
+  font-size: 21px;
+  letter-spacing: 0.1em;
+}
+
+.practice-stage {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  border-radius: 22px;
+  border: 1px solid var(--line);
+  background: radial-gradient(120% 90% at 50% 0%, #141327 0%, #08080f 72%);
+}
+
+/* The race tree, laid out as a horizontal practice board. */
+.tree.tree-prac {
+  position: static;
+  transform: none;
+  flex-direction: row;
+  gap: 11px;
+  padding: 13px;
+}
+
+.tree.tree-prac .lamp {
+  width: 32px;
+  height: 32px;
+}
+
+.practice-read {
+  font-family: var(--mono);
+  font-size: 44px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: #fff;
+  font-variant-numeric: tabular-nums;
+}
+
+.practice-grade {
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.22em;
+  color: var(--dim);
+}
+
+.practice-grade.good {
+  color: #2bff9a;
+  text-shadow: 0 0 22px rgba(43, 255, 154, 0.5);
+}
+
+.practice-grade.ok {
+  color: #dfe6ff;
+}
+
+.practice-grade.bad {
+  color: #ff8fa0;
+}
+
+.practice-grade.dim {
+  color: #6d7290;
+}
+
+.practice-stats {
+  flex: none;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 9px;
+}
+
+.practice-stats div {
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--line);
+}
+
+.practice-stats span {
+  display: block;
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: 0.2em;
+  color: var(--dim);
+}
+
+.practice-stats b {
+  display: block;
+  margin-top: 4px;
+  font-family: var(--mono);
+  font-size: 18px;
+  color: #fff;
+  font-variant-numeric: tabular-nums;
+}
+
 .garage-foot {
   flex: none;
   display: grid;
-  grid-template-columns: 1fr 1.6fr;
+  grid-template-columns: 1fr 1fr 1.5fr;
   gap: 9px;
 }
 
