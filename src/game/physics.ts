@@ -28,6 +28,8 @@ export type Runner = {
   reaction: number;
   finishTime: number | null;
   trap: number;
+  /** Fastest the car went at any point in the run, in m/s. */
+  topSpeed: number;
   sixty: number | null;
   hundred: number | null;
   powerScale: number;
@@ -52,6 +54,7 @@ export function createRunner(spec: CarSpec, powerScale = 1): Runner {
     reaction: 0,
     finishTime: null,
     trap: 0,
+    topSpeed: 0,
     sixty: null,
     hundred: null,
     powerScale,
@@ -109,6 +112,7 @@ export function stepRunner(r: Runner, dt: number, throttle: number): void {
   if (throttle <= 0) accel -= 2.4;
 
   r.v = Math.max(0, r.v + accel * dt);
+  if (r.v > r.topSpeed) r.topSpeed = r.v;
   r.dist += r.v * dt;
   r.spinAngle += (r.v / WHEEL_R) * dt;
 

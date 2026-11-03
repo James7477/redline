@@ -36,7 +36,7 @@ export default function App() {
   const handleResult = useCallback(
     (result: RaceResult) => {
       if (result.outcome === 'foul' || result.playerEt <= 0) return;
-      setRecords(saveRecord(spec.id, result.playerEt, result.playerTrap));
+      setRecords(saveRecord(spec.id, result.playerEt, result.playerTrap, result.playerTop));
     },
     [spec.id],
   );

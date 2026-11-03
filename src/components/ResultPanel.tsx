@@ -5,6 +5,8 @@ export type RaceResult = {
   outcome: 'win' | 'lose' | 'foul' | 'dnf';
   playerEt: number;
   playerTrap: number;
+  /** Fastest speed of the run, m/s — saved with the record. */
+  playerTop: number;
   reaction: number;
   sixty: number | null;
   hundred: number | null;

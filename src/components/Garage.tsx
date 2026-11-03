@@ -1,6 +1,7 @@
 import { useMemo, useState, type CSSProperties } from 'react';
 import { CARS, DIFFICULTIES, type CarSpec, type DifficultyId } from '../game/cars';
 import { DEFAULT_LIVERY, applyLivery, type Livery } from '../game/livery';
+import { MPS_TO_MPH } from '../game/physics';
 import { formatEt, launchRating, type LiveryMap, type Reactions, type Records } from '../game/storage';
 import { CarThumb } from './CarThumb';
 import { Customize } from './Customize';
@@ -33,16 +34,22 @@ function CarCard({
   car,
   selected,
   best,
+  trap,
+  top,
   reaction,
   onPick,
 }: {
   car: CarSpec;
   selected: boolean;
   best: number | null;
+  /** Trap and top speed of the record run, m/s. */
+  trap: number;
+  top: number;
   reaction: number | null;
   onPick: () => void;
 }) {
   const rating = launchRating(reaction);
+  const mph = (v: number) => (v > 0 ? String(Math.round(v * MPS_TO_MPH)) : '—');
   return (
     <button
       className={`car ${selected ? 'sel' : ''}`}
@@ -88,6 +95,15 @@ function CarCard({
             <i style={{ width: `${rating.score}%` }} />
           </div>
         </div>
+      </div>
+      <div className="car-speed">
+        <span>
+          TRAP <b>{mph(trap)}</b>
+        </span>
+        <span>
+          TOP <b>{mph(top)}</b>
+        </span>
+        <i>MPH</i>
       </div>
     </button>
   );
@@ -136,6 +152,8 @@ export function Garage({
               car={painted[car.id] ?? car}
               selected={car.id === carId}
               best={records[car.id]?.et ?? null}
+              trap={records[car.id]?.trap ?? 0}
+              top={records[car.id]?.top ?? 0}
               reaction={reactions[car.id] ?? null}
               onPick={() => onPickCar(car.id)}
             />

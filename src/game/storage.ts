@@ -5,6 +5,8 @@ const KEY = 'redline.records.v1';
 export type StoredRecord = {
   et: number;
   trap: number;
+  /** Fastest speed of the record run, m/s. Older records have no value (0). */
+  top: number;
   when: number;
 };
 
@@ -21,7 +23,12 @@ export function loadRecords(): Records {
       if (!value || typeof value !== 'object') continue;
       const v = value as Partial<StoredRecord>;
       if (typeof v.et === 'number' && Number.isFinite(v.et)) {
-        out[id] = { et: v.et, trap: typeof v.trap === 'number' ? v.trap : 0, when: v.when ?? 0 };
+        out[id] = {
+          et: v.et,
+          trap: typeof v.trap === 'number' ? v.trap : 0,
+          top: typeof v.top === 'number' ? v.top : 0,
+          when: v.when ?? 0,
+        };
       }
     }
     return out;
@@ -30,11 +37,11 @@ export function loadRecords(): Records {
   }
 }
 
-export function saveRecord(id: string, et: number, trap: number): Records {
+export function saveRecord(id: string, et: number, trap: number, top: number): Records {
   const records = loadRecords();
   const existing = records[id];
   if (!existing || et < existing.et) {
-    records[id] = { et, trap, when: Date.now() };
+    records[id] = { et, trap, top, when: Date.now() };
     try {
       localStorage.setItem(KEY, JSON.stringify(records));
     } catch {
