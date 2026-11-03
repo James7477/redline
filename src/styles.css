@@ -237,7 +237,7 @@ button {
 }
 
 .car-thumb {
-  grid-row: 1 / span 3;
+  grid-row: 1 / span 4;
   width: 100%;
   height: 62px;
   display: block;
@@ -275,6 +275,47 @@ button {
   height: 100%;
   border-radius: 2px;
   background: linear-gradient(90deg, #5566ff, var(--teal));
+}
+
+/* Launch rating, carried in from the tree drill. */
+.car-launch {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 7px;
+  margin-top: 3px;
+}
+
+.car-launch span {
+  font-size: 8px;
+  letter-spacing: 0.16em;
+  color: var(--dim);
+}
+
+.car-launch .track {
+  height: 4px;
+  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.075);
+  overflow: hidden;
+}
+
+.car-launch .track i {
+  display: block;
+  height: 100%;
+  border-radius: 2px;
+  background: linear-gradient(90deg, #ffb347, #ff3b4e);
+}
+
+.car-launch b {
+  font-family: var(--mono);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.13em;
+  color: #d7dcf2;
+}
+
+.car-launch b.unrated {
+  color: #5f6480;
 }
 
 .seg {

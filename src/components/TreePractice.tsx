@@ -10,6 +10,13 @@ type Phase = 'idle' | 'tree' | 'done';
 
 type Leave = { kind: 'foul' } | { kind: 'run'; rt: number };
 
+type Props = {
+  /** Carried over from earlier drills in this car, so a run of attempts builds. */
+  bestReaction: number | null;
+  onReaction: (rt: number) => void;
+  onClose: () => void;
+};
+
 function gradeOf(rt: number): { text: string; tone: string } {
   if (rt <= HOLESHOT_RT) return { text: 'HOLESHOT', tone: 'good' };
   if (rt <= CLEAN_RT) return { text: 'CLEAN LAUNCH', tone: 'ok' };
@@ -20,18 +27,18 @@ function gradeOf(rt: number): { text: string; tone: string } {
  * Tree drill: stage, wait out the ambers, tap on green. Nothing else runs, so a
  * clumsy launch costs nothing but the next attempt.
  */
-export function TreePractice({ onClose }: { onClose: () => void }) {
+export function TreePractice({ bestReaction, onReaction, onClose }: Props) {
   const [phase, setPhase] = useState<Phase>('idle');
   const [lights, setLights] = useState(0);
   const [leave, setLeave] = useState<Leave | null>(null);
   const [runs, setRuns] = useState(0);
   const [last, setLast] = useState<number | null>(null);
-  const [best, setBest] = useState<number | null>(null);
+  const [best, setBest] = useState<number | null>(bestReaction);
 
   const phaseRef = useRef<Phase>('idle');
   const treeStartRef = useRef(0);
   const greenAtRef = useRef(0);
-  const bestRef = useRef<number | null>(null);
+  const bestRef = useRef<number | null>(bestReaction);
 
   const go = useCallback((next: Phase) => {
     phaseRef.current = next;
@@ -81,9 +88,11 @@ export function TreePractice({ onClose }: { onClose: () => void }) {
       bestRef.current = rt;
       setBest(rt);
     }
+    // Only a clean leave counts — a red light never lowers the stored best.
+    onReaction(rt);
     setLeave({ kind: 'run', rt });
     go('done');
-  }, [go, stage]);
+  }, [go, onReaction, stage]);
 
   const grade = leave && leave.kind === 'run' ? gradeOf(leave.rt) : null;
   const label = phase === 'tree' ? 'TAP ON GREEN' : phase === 'idle' ? 'STAGE THE TREE' : 'GO AGAIN';

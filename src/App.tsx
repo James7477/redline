@@ -7,10 +7,13 @@ import { carById, difficultyById, type DifficultyId } from './game/cars';
 import { applyLivery, type Livery } from './game/livery';
 import {
   loadLiveries,
+  loadReactions,
   loadRecords,
   saveLivery,
+  saveReaction,
   saveRecord,
   type LiveryMap,
+  type Reactions,
   type Records,
 } from './game/storage';
 
@@ -22,6 +25,8 @@ export default function App() {
   const [muted, setMuted] = useState(false);
   const [records, setRecords] = useState<Records>(() => loadRecords());
   const [liveries, setLiveries] = useState<LiveryMap>(() => loadLiveries());
+  /** Best reaction per car, carried in from the tree drill. */
+  const [reactions, setReactions] = useState<Reactions>(() => loadReactions());
 
   const baseSpec = carById(carId);
   const spec = useMemo(() => applyLivery(baseSpec, liveries[carId]), [baseSpec, liveries, carId]);
@@ -32,6 +37,13 @@ export default function App() {
     (result: RaceResult) => {
       if (result.outcome === 'foul' || result.playerEt <= 0) return;
       setRecords(saveRecord(spec.id, result.playerEt, result.playerTrap));
+    },
+    [spec.id],
+  );
+
+  const handleReaction = useCallback(
+    (rt: number) => {
+      setReactions(saveReaction(spec.id, rt));
     },
     [spec.id],
   );
@@ -79,11 +91,16 @@ export default function App() {
             onPickCar={setCarId}
             onPickDifficulty={setDifficulty}
             onLivery={handleLivery}
+            reactions={reactions}
             onStart={start}
             onPractice={practice}
           />
         ) : screen === 'practice' ? (
-          <TreePractice onClose={exit} />
+          <TreePractice
+            bestReaction={reactions[spec.id] ?? null}
+            onReaction={handleReaction}
+            onClose={exit}
+          />
         ) : (
           <Race
             key={`${spec.id}-${difficulty}-${run}-${spec.body}`}

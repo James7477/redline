@@ -1,7 +1,7 @@
 import { useMemo, useState, type CSSProperties } from 'react';
 import { CARS, DIFFICULTIES, type CarSpec, type DifficultyId } from '../game/cars';
 import { DEFAULT_LIVERY, applyLivery, type Livery } from '../game/livery';
-import { formatEt, type LiveryMap, type Records } from '../game/storage';
+import { formatEt, launchRating, type LiveryMap, type Reactions, type Records } from '../game/storage';
 import { CarThumb } from './CarThumb';
 import { Customize } from './Customize';
 
@@ -10,6 +10,7 @@ type Props = {
   difficulty: DifficultyId;
   records: Records;
   liveries: LiveryMap;
+  reactions: Reactions;
   onPickCar: (id: string) => void;
   onPickDifficulty: (id: DifficultyId) => void;
   onLivery: (carId: string, livery: Livery) => void;
@@ -32,13 +33,16 @@ function CarCard({
   car,
   selected,
   best,
+  reaction,
   onPick,
 }: {
   car: CarSpec;
   selected: boolean;
   best: number | null;
+  reaction: number | null;
   onPick: () => void;
 }) {
+  const rating = launchRating(reaction);
   return (
     <button
       className={`car ${selected ? 'sel' : ''}`}
@@ -64,6 +68,15 @@ function CarCard({
         <Stat label="GRIP" value={car.stats.grip} />
         <Stat label="AERO" value={car.stats.aero} />
       </div>
+      <div className="car-launch">
+        <span>LAUNCH</span>
+        <div className="track">
+          <i style={{ width: `${rating.score}%` }} />
+        </div>
+        <b className={rating.score === 0 ? 'unrated' : ''}>
+          {rating.score === 0 ? 'UNRATED' : rating.label}
+        </b>
+      </div>
     </button>
   );
 }
@@ -73,6 +86,7 @@ export function Garage({
   difficulty,
   records,
   liveries,
+  reactions,
   onPickCar,
   onPickDifficulty,
   onLivery,
@@ -110,6 +124,7 @@ export function Garage({
               car={painted[car.id] ?? car}
               selected={car.id === carId}
               best={records[car.id]?.et ?? null}
+              reaction={reactions[car.id] ?? null}
               onPick={() => onPickCar(car.id)}
             />
           ))}

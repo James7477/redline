@@ -88,3 +88,46 @@ export function saveLivery(carId: string, livery: Livery): LiveryMap {
   }
   return all;
 }
+
+/* ------------------------------------------------------- launch ratings */
+
+const REACTION_KEY = 'redline.reaction.v1';
+
+/** Best reaction time per car id, set in the tree drill. */
+export type Reactions = Record<string, number>;
+
+export function loadReactions(): Reactions {
+  const parsed = safeParse(localStorage.getItem(REACTION_KEY));
+  if (!parsed || typeof parsed !== 'object') return {};
+  const out: Reactions = {};
+  for (const [id, value] of Object.entries(parsed as Record<string, unknown>)) {
+    if (typeof value === 'number' && Number.isFinite(value) && value >= 0) out[id] = value;
+  }
+  return out;
+}
+
+export function saveReaction(id: string, rt: number): Reactions {
+  const all = loadReactions();
+  const existing = all[id];
+  if (existing === undefined || rt < existing) {
+    all[id] = rt;
+    try {
+      localStorage.setItem(REACTION_KEY, JSON.stringify(all));
+    } catch {
+      /* storage full or blocked */
+    }
+  }
+  return all;
+}
+
+/**
+ * Turn a best reaction time into a 0-100 launch rating for the garage. ~0.09 s
+ * tops it out, and anything past half a second reads as asleep at the tree.
+ */
+export function launchRating(rt: number | null): { score: number; label: string } {
+  if (rt === null || !Number.isFinite(rt)) return { score: 0, label: 'UNRATED' };
+  const score = Math.max(10, Math.min(100, Math.round(112 - rt * 130)));
+  const label =
+    rt <= 0.12 ? 'SHARP' : rt <= 0.22 ? 'QUICK' : rt <= 0.4 ? 'FAIR' : rt <= 0.6 ? 'SLEEPY' : 'ASLEEP';
+  return { score, label };
+}
